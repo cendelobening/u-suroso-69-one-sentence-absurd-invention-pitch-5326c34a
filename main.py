@@ -2,6 +2,13 @@
 
 Writes a single original one-sentence pitch to <output dir>/entry.txt
 and verifies the file afterwards. Pure standard library.
+
+The pitch itself imagines the Wifisitter, a tiny traffic cop for home
+Wi-Fi who waves video calls through with a white glove and fines a
+smart fridge for buffering the meeting. The program validates that
+the sentence is exactly one sentence within the 220-character limit,
+writes it atomically, and reads it back to prove the file on disk is
+byte-for-byte the sentence that was validated.
 """
 
 import os
@@ -16,6 +23,11 @@ LINE = (
 )
 
 MAX_CHARS = 220
+
+
+def describe():
+    """Return a one-line summary of what this program does."""
+    return "Writes one absurd one-sentence invention pitch to entry.txt."
 
 
 def check_line(line):
@@ -52,8 +64,8 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
     target = os.path.join(out_dir, "entry.txt")
 
-    # Write to a temp file in the same directory, then move it into
-    # place so the entry is never seen half-written.
+    # Write to a temp file in the same directory, then atomically
+    # move it into place so the entry is never seen half-written.
     fd, tmp_path = tempfile.mkstemp(dir=out_dir, prefix=".entry-", suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
@@ -82,8 +94,8 @@ def main():
     if mode != 0o644:
         raise ValueError("verification failed: entry.txt mode is %o" % mode)
     print(
-        "wrote %d characters (%d bytes) to %s: %s"
-        % (len(LINE), len(raw), target, LINE)
+        "%s Wrote %d characters (%d bytes) to %s: %s"
+        % (describe(), len(LINE), len(raw), target, LINE)
     )
 
 
